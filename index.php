@@ -65,7 +65,7 @@ if (!isset($_SESSION['user_id'])) {
                             echo '<td>' . htmlspecialchars($row['Quantity']) . '</td>';
                             echo '<td>' . htmlspecialchars($row['Status']) . '</td>';
                             echo '<td>' . htmlspecialchars($row['SupplierName']) . '</td>';
-                            echo '<td><a href="update.php?id=' . $row['ProductID'] . '">Update</a> | <a href="delete.php?id=' . $row['ProductID'] . '">Delete</a></td>';
+                            echo '<td><a href="update.php?id=' . $row['ProductID'] . '&supplier=' . $row['SupplierName'] . '">Update</a> | <a href="delete.php?id=' . $row['ProductID'] . '&supplier=' . $row['SupplierName'] . '">Delete</a></td>';
                             echo '</tr>';
                         }
                         ?>
@@ -78,6 +78,11 @@ if (!isset($_SESSION['user_id'])) {
             <div class="col-md-12">
                 <h2>Add New Product</h2>
                 <form method="post" action="add_product.php" class="needs-validation" novalidate>
+                <div class="form-group">
+                        <label for="product_id">Product ID:</label>
+                        <input type="text" class="form-control" id="product_id" name="product_id" required>
+                        <div class="invalid-feedback">Please enter a product ID number.</div>
+                    </div>
                     <div class="form-group">
                         <label for="product_name">Product Name:</label>
                         <input type="text" class="form-control" id="product_name" name="product_name" required>
