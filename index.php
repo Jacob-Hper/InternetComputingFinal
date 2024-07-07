@@ -19,6 +19,7 @@ if (!isset($_SESSION['user_id'])) {
     <style>
         body {
             padding-top: 50px;
+            padding-bottom: 50px;
         }
         .table-container {
             margin-top: 30px;
@@ -32,11 +33,13 @@ if (!isset($_SESSION['user_id'])) {
     <div class="container">
         <div class="row">
             <div class="col-md-12 text-center">
-                <h1>Welcome to the Inventory System</h1>
+                <h1>Inventory Management System</h1>
                 <a href="logout.php" class="btn btn-danger mt-3">Logout</a>
             </div>
         </div>
         
+        <!--        PRODUCT TABLE        -->
+
         <div class="row table-container">
             <div class="col-md-12">
                 <h2>Product List</h2>
@@ -61,7 +64,7 @@ if (!isset($_SESSION['user_id'])) {
                             echo '<td>' . htmlspecialchars($row['ProductID']) . '</td>';
                             echo '<td>' . htmlspecialchars($row['ProductName']) . '</td>';
                             echo '<td>' . htmlspecialchars($row['Description']) . '</td>';
-                            echo '<td>' . htmlspecialchars($row['Price']) . '</td>';
+                            echo '<td>$' . htmlspecialchars($row['Price']) . '</td>';
                             echo '<td>' . htmlspecialchars($row['Quantity']) . '</td>';
                             echo '<td>' . htmlspecialchars($row['Status']) . '</td>';
                             echo '<td>' . htmlspecialchars($row['SupplierName']) . '</td>';
@@ -73,6 +76,43 @@ if (!isset($_SESSION['user_id'])) {
                 </table>
             </div>
         </div>
+
+        <!--        INVENTORY TABLE        -->
+
+        <div class="row table-container">
+            <div class="col-md-12">
+                <h2>Inventory</h2>
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Product Name</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Supplier Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $stmt = $pdo->query('SELECT p.ProductID, p.ProductName, p.Quantity, p.Price, p.Status, s.SupplierName FROM Product p JOIN Supplier s ON p.SupplierID = s.SupplierID');
+                        while ($row = $stmt->fetch()) {
+                            echo '<tr>';
+                            echo '<td>' . htmlspecialchars($row['ProductID']) . '</td>';
+                            echo '<td>' . htmlspecialchars($row['ProductName']) . '</td>';
+                            echo '<td>' . htmlspecialchars($row['Quantity']) . '</td>';
+                            echo '<td>$' . htmlspecialchars($row['Price']) . '</td>';
+                            echo '<td>' . htmlspecialchars($row['Status']) . '</td>';
+                            echo '<td>' . htmlspecialchars($row['SupplierName']) . '</td>';
+                            echo '</tr>';
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!--        INSERT NEW ITEM        -->
         
         <div class="row form-container">
             <div class="col-md-12">
