@@ -7,6 +7,14 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+
+function supplier_name_to_id($name, $pdo){
+    $stmt = $pdo->prepare("SELECT SupplierID FROM Supplier WHERE SupplierName = :supplier;");
+    $stmt->execute(['supplier' => $name]);
+    $supplier_id = $stmt->fetch();
+    return $supplier_id['SupplierID'];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -27,6 +35,18 @@ if (!isset($_SESSION['user_id'])) {
         .form-container {
             margin-top: 30px;
         }
+        .search {
+            display: table 
+        }
+        .search-field{
+            display: table-cell;
+        }
+        .searh-input{
+            width: auto;
+        }
+        .pad{
+            padding-left: 20px;
+        }
     </style>
 </head>
 <body>
@@ -35,7 +55,40 @@ if (!isset($_SESSION['user_id'])) {
             <div class="col-md-12 text-center">
                 <h1>Inventory Management System</h1>
                 <a href="logout.php" class="btn btn-danger mt-3">Logout</a>
+                <a href="index.php" class= "btn btn-primary mt-3">Clear Search</a>
             </div>
+        </div>
+        <div class="search" style="padding-top: 10px">
+            <form method="get" action="index.php" class="skipEmptyFields">
+                <div class="search-field pad">
+                    <label for="productid">Product ID:</label>
+                    <input type="text" id="p.ProductId" name="productid", class="form-control">
+                </div>
+                <div class="search-field pad">
+                    <label for="productName">Product Name:</label>
+                    <input type="text" id="p.ProductName" name="productName", class="form-control">
+                </div>
+                <div class="search-field pad">
+                    <label for="price">Price</label>
+                    <input type="text" id="p.Price" name="price", class="form-control">
+                </div>
+                <div class="search-field pad">
+                    <label for="quantity">Quantity</label>
+                    <input type="text" id="p.Quantity" name="quantity", class="form-control">
+                </div>
+                <div class="search-field pad">
+                    <label for="status">Status</label>
+                    <input type="text" id="p.Status" name="status", class="form-control">
+                </div>
+                <div class="search-field pad">
+                    <label for="supplier">Supplier</label>
+                    <input type="text" id="s.SupplierName" name="supplier", class="form-control">
+                </div>
+                <div class="search-field pad">
+                    <label></label>
+                    <input type="submit" value="Search", class="btn btn-primary">
+                </div>
+            </form>
         </div>
         
         <!--        PRODUCT TABLE        -->
@@ -58,19 +111,57 @@ if (!isset($_SESSION['user_id'])) {
                     </thead>
                     <tbody>
                         <?php
-                        $stmt = $pdo->query('SELECT p.*, s.SupplierName FROM Product p JOIN Supplier s ON p.SupplierID = s.SupplierID');
-                        while ($row = $stmt->fetch()) {
-                            echo '<tr>';
-                            echo '<td>' . htmlspecialchars($row['ProductID']) . '</td>';
-                            echo '<td>' . htmlspecialchars($row['ProductName']) . '</td>';
-                            echo '<td>' . htmlspecialchars($row['Description']) . '</td>';
-                            echo '<td>$' . htmlspecialchars($row['Price']) . '</td>';
-                            echo '<td>' . htmlspecialchars($row['Quantity']) . '</td>';
-                            echo '<td>' . htmlspecialchars($row['Status']) . '</td>';
-                            echo '<td>' . htmlspecialchars($row['SupplierName']) . '</td>';
-                            echo '<td><a href="update.php?id=' . $row['ProductID'] . '&supplier=' . $row['SupplierName'] . '">Update</a> | <a href="delete.php?id=' . $row['ProductID'] . '&supplier=' . $row['SupplierName'] . '">Delete</a></td>';
-                            echo '</tr>';
+                        if (!empty($_GET)){
+                            $query = "SELECT p.*, s.SupplierName FROM Product p JOIN Supplier s ON p.SupplierID = s.SupplierID WHERE";
+                            $alias = array("p.ProductId", 's.SupplierName', 'p.ProductName', 'p.Quantity', 'p.Status', 'p.Price');
+                            $fields = array("productid", 'supplier', 'productName', 'quantity', 'status', 'price');
+                            $values = array();
+                            $index = 0;
+                            foreach($fields as $field){
+                                if (isset($_GET[$field])){
+                                    if($field == "productName" || $field == "supplier"){
+                                        $query = $query . " " . $alias[$index] . " = \"" . $_GET[$field] . "\"";
+                                    }else{
+                                        $query = $query . " " . $alias[$index] . " = " . $_GET[$field];
+                                    }
+                                    
+                                    $query = $query . " AND ";
+                                }
+                                $index++;
+                            }
+                            $query = substr($query, 0, -5) . ";";
+
+                            $stmt = $pdo->query($query);
+                            while ($row = $stmt->fetch()) {
+                                echo '<tr>';
+                                echo '<td>' . htmlspecialchars($row['ProductID']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['ProductName']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['Description']) . '</td>';
+                                echo '<td>$' . htmlspecialchars($row['Price']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['Quantity']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['Status']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['SupplierName']) . '</td>';
+                                echo '<td><a href="update.php?id=' . $row['ProductID'] . '&supplier=' . $row['SupplierName'] . '">Update</a> | <a href="delete.php?id=' . $row['ProductID'] . '&supplier=' . $row['SupplierName'] . '">Delete</a></td>';
+                                echo '</tr>';
                         }
+                        echo "<style> .search{visibility: hidden;} </style>";
+
+                            
+                        }else{
+                            $stmt = $pdo->query('SELECT p.*, s.SupplierName FROM Product p JOIN Supplier s ON p.SupplierID = s.SupplierID');
+                            while ($row = $stmt->fetch()) {
+                                echo '<tr>';
+                                echo '<td>' . htmlspecialchars($row['ProductID']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['ProductName']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['Description']) . '</td>';
+                                echo '<td>$' . htmlspecialchars($row['Price']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['Quantity']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['Status']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['SupplierName']) . '</td>';
+                                echo '<td><a href="update.php?id=' . $row['ProductID'] . '&supplier=' . $row['SupplierName'] . '">Update</a> | <a href="delete.php?id=' . $row['ProductID'] . '&supplier=' . $row['SupplierName'] . '">Delete</a></td>';
+                                echo '</tr>';
+                        }
+                    }
                         ?>
                     </tbody>
                 </table>
@@ -178,6 +269,18 @@ if (!isset($_SESSION['user_id'])) {
                 });
             }, false);
         })();
+
+        window.addEventListener('load', function() {
+            let forms = document.getElementsByClassName('skipEmptyFields');
+            for (let form of forms) {
+                form.addEventListener('formdata', function(event) {
+                    let formData = event.formData;
+                    for (let [name, value] of Array.from(formData.entries())) {
+                        if (value === '') formData.delete(name);
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
