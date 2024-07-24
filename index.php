@@ -119,7 +119,7 @@ function supplier_name_to_id($name, $pdo){
                             $index = 0;
                             foreach($fields as $field){
                                 if (isset($_GET[$field])){
-                                    if($field == "productName" || $field == "supplier"){
+                                    if($field == "productName" || $field == "supplier" || $field == "status"){
                                         $query = $query . " " . $alias[$index] . " = \"" . $_GET[$field] . "\"";
                                     }else{
                                         $query = $query . " " . $alias[$index] . " = " . $_GET[$field];
